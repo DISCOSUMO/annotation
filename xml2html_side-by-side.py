@@ -1,9 +1,8 @@
-# xml2html_side-by-side.py sample_viva/
+# coding=utf-8
+#  xml2html_side-by-side.py sample_viva/
 
 import os
 import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
 import re
 from random import randint
 import xml.etree.ElementTree as ET
@@ -47,7 +46,7 @@ with open("evaluation/postfeats.F..out",'r') as featfile:
         postid = columns[1]
         selected = columns[13].rstrip()
         postvotes_A[(threadid,postid)] = selected
-        print "A",threadid,postid,selected
+        #print ("A",threadid,postid,selected)
 
 with open("evaluation/postfeats.Judith.out",'r') as featfile:
     for line in featfile:
@@ -57,7 +56,7 @@ with open("evaluation/postfeats.Judith.out",'r') as featfile:
         postid = columns[1]
         selected = columns[13].rstrip()
         postvotes_B[(threadid,postid)] = selected
-        print "B",threadid,postid,selected
+        #print ("B",threadid,postid,selected)
 
 with open("evaluation/postfeats.Niree_Bakker.out",'r') as featfile:
     for line in featfile:
@@ -67,7 +66,7 @@ with open("evaluation/postfeats.Niree_Bakker.out",'r') as featfile:
         postid = columns[1]
         selected = columns[13].rstrip()
         postvotes_C[(threadid,postid)] = selected
-        print "C",threadid,postid,selected
+        print ("C",threadid,postid,selected)
 
 with open("evaluation/postfeats.Lian_Bouten.out",'r') as featfile:
     for line in featfile:
@@ -77,7 +76,7 @@ with open("evaluation/postfeats.Lian_Bouten.out",'r') as featfile:
         postid = columns[1]
         selected = columns[13].rstrip()
         postvotes_D[(threadid,postid)] = selected
-        print "D",threadid,postid,selected
+        #print ("D",threadid,postid,selected)
 
 #sys.exit()
 
@@ -118,8 +117,8 @@ with open("cross-user-sample.txt",'r') as crossusersample:
 
 
 
-for (threadid,rater) in crossuser:
-    print threadid, rater, crossuser[(threadid,rater)]
+#for (threadid,rater) in crossuser:
+#    print (threadid, rater, crossuser[(threadid,rater)])
 
 sys.stderr.write("Read files in "+rootdir+"\n")
 
@@ -176,18 +175,18 @@ def replace_quote(postcontent):
     return adapted
 
 
-def print_children(leaf,indent): # leaf is a post id, indent is the size of the indentation, row is the nth row of the list
+def print_children(leaf,indent,postvotes,which): # leaf is a post id, indent is the size of the indentation, row is the nth row of the list
     global row
     indent += 3
     #print indent,leaf
     currentpostid = leaf
-    print_post(currentpostid,indent)
+    print_post(currentpostid,indent,postvotes,which)
 
-    if children.has_key(leaf):
+    if leaf in children:
         children_of_leaf = children[leaf]
         #print "has children", children_of_leaf
         for child in children_of_leaf:
-            print_children(child,indent)
+            print_children(child,indent,postvotes,which)
 
 
 row=0
@@ -307,7 +306,7 @@ def print_summary(out,root,postvotes,which):
                 parentid = post.find('parentid').text
                 if parentid is not None:
                     children_of_parent = list()
-                    if children.has_key(parentid):
+                    if parentid in children:
                         children_of_parent = children[parentid]
                     children_of_parent.append(postid)
                     #print "parent:",parentid,"child:",postid
@@ -315,7 +314,7 @@ def print_summary(out,root,postvotes,which):
                 postcount += 1
 
 
-    #print_children(id_of_firstpost,"")
+    #print_children(id_of_firstpost,"",postvotes,which)
 
     title=""
     noofposts = 0
@@ -336,7 +335,7 @@ def print_summary(out,root,postvotes,which):
         id_of_firstpost = list_of_posts[0].get('id')
         noofposts = len(list_of_posts)
         if hierarchy:
-            print_children(id_of_firstpost,0)
+            print_children(id_of_firstpost,0,postvotes,which)
         else:
             postcount = 0
             for post in list_of_posts:

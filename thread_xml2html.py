@@ -1,13 +1,8 @@
+# coding=utf-8
 # thread_xml2html.py 2ny4u1.xml
 
-import os
 import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
 import re
-import math
-import fileinput
-from collections import defaultdict
 import xml.etree.ElementTree as ET
 
 hierarchy = False
@@ -33,7 +28,7 @@ tree = ET.parse(xmlfile)
 root = tree.getroot()
 id_of_firstpost = ""
 forumtype = root.get('type')
-print forumtype
+print (forumtype)
 if forumtype == "viva":
     hierarchy = False
 if forumtype == "reddit":
@@ -89,7 +84,7 @@ for thread in root:
             parentid = post.find('parentid').text
             if parentid is not None:
                 children_of_parent = list()
-                if children.has_key(parentid):
+                if parentid in children:
                     children_of_parent = children[parentid]
                 children_of_parent.append(postid)
                 #print "parent:",parentid,"child:",postid
@@ -226,7 +221,7 @@ def print_children(leaf,indent): # leaf is a post id, indent is the size of the 
     currentpostid = leaf
     print_post(currentpostid,indent)
 
-    if children.has_key(leaf):
+    if leaf in children:
         children_of_leaf = children[leaf]
         #print "has children", children_of_leaf
         for child in children_of_leaf:
@@ -236,7 +231,6 @@ def print_children(leaf,indent): # leaf is a post id, indent is the size of the 
 
 title=""
 noofposts = 0
-threadid = ""
 for thread in root:
     threadid = thread.get('id')
     category = thread.find('category').text
@@ -246,7 +240,7 @@ for thread in root:
     #for posts in thread.findall('posts'):
         #id_of_firstpost = firstpost.get('id')
     id_of_firstpost = list_of_posts[0].get('id')
-    noofposts = len(list_of_posts)
+    #noofposts = len(list_of_posts)
     if hierarchy:
         print_children(id_of_firstpost,0)
     else:
@@ -256,70 +250,70 @@ for thread in root:
 
     out.write("</table>\n")
 
-out.write('</div>\n</div>\n')
+    out.write('</div>\n</div>\n')
 
-out.write('<div class="col-sm-6">\n')
-out.write('<div class="list-group">\n')
-out.write('<a href="#" class="list-group-item active" style="padding-left:2em">[category: '+category+']<br><br>\n<b>'+title+'</b></a>\n')
-out.write('<table border=1 width="100%">\n')
-out.write("<tr>")
-out.write('<td width="100%">')
-out.write('<a href="#" class="list-group-item" style="padding-left:2em"  id="row'+str(1)+'" onclick="'
-    'addTxt(\'-'+postidperrow[1]+'\',\'selected\');')
-out.write('getElementById(\'row'+str(1)+'\').innerHTML=\'...\'">'+openingpostwithauthor)
-#out.write('<td width="100%"  style="padding-left:2em;padding-right:1em"><a href="#" >...</a></td>')
-out.write("</a></td>\n")
-out.write("</tr>\n")
-for i in range (2,noofposts+1):
+    out.write('<div class="col-sm-6">\n')
+    out.write('<div class="list-group">\n')
+    out.write('<a href="#" class="list-group-item active" style="padding-left:2em">[category: '+category+']<br><br>\n<b>'+title+'</b></a>\n')
+    out.write('<table border=1 width="100%">\n')
     out.write("<tr>")
     out.write('<td width="100%">')
-    out.write('<a href="#" class="list-group-item" style="padding-left:2em"  id="row'+str(i)+'" onclick="'
-        'addTxt(\'-'+postidperrow[i]+'\',\'selected\');')
-    out.write('getElementById(\'row'+str(i)+'\').innerHTML=\''+'...'+'\'">...')
+    out.write('<a href="#" class="list-group-item" style="padding-left:2em"  id="row'+str(1)+'" onclick="'
+        'addTxt(\'-'+postidperrow[1]+'\',\'selected\');')
+    out.write('getElementById(\'row'+str(1)+'\').innerHTML=\'...\'">'+openingpostwithauthor)
     #out.write('<td width="100%"  style="padding-left:2em;padding-right:1em"><a href="#" >...</a></td>')
     out.write("</a></td>\n")
     out.write("</tr>\n")
-out.write("</table>\n")
-out.write('</div>\n</div>\n')
+    for i in range (2,noofposts+1):
+        out.write("<tr>")
+        out.write('<td width="100%">')
+        out.write('<a href="#" class="list-group-item" style="padding-left:2em"  id="row'+str(i)+'" onclick="'
+            'addTxt(\'-'+postidperrow[i]+'\',\'selected\');')
+        out.write('getElementById(\'row'+str(i)+'\').innerHTML=\''+'...'+'\'">...')
+        #out.write('<td width="100%"  style="padding-left:2em;padding-right:1em"><a href="#" >...</a></td>')
+        out.write("</a></td>\n")
+        out.write("</tr>\n")
+    out.write("</table>\n")
+    out.write('</div>\n</div>\n')
 
-#Also ask them to indicate:
-#   their familiarity with the topic of the thread (scale 1-5)
-#   their familiarity with reddit (scale 1-5)
-#   how useful a summary of the thread would be for a reddit visitor on a mobile device (scale 1-5)
-#   and give room for additional comments
+    #Also ask them to indicate:
+    #   their familiarity with the topic of the thread (scale 1-5)
+    #   their familiarity with reddit (scale 1-5)
+    #   how useful a summary of the thread would be for a reddit visitor on a mobile device (scale 1-5)
+    #   and give room for additional comments
 
-out.write('Geef op een schaal van 1 tot 5 aan hoe vertrouwd je bent met het onderwerp'
-          ' dat wordt besproken in dit topic:<br>\n'
-          '<input type="radio" name="familiarity" value="1">&nbsp;&nbsp;&nbsp;1 (totaal niet vertrouwd)<br>\n'
-          '<input type="radio" name="familiarity" value="2">&nbsp;&nbsp;&nbsp;2<br>'
-          '<input type="radio" name="familiarity" value="3">&nbsp;&nbsp;&nbsp;3<br>'
-          '<input type="radio" name="familiarity" value="4">&nbsp;&nbsp;&nbsp;4<br>'
-          '<input type="radio" name="familiarity" value="5">&nbsp;&nbsp;&nbsp;5 (heel vertrouwd)<br>')
-out.write('<br>Geef op een schaal van 1 tot 5 aan hoe nuttig je het zou vinden om voor dit topic de mogelijkheid te hebben '
-          'om alleen de belangrijkste posts te zien (bijvoorbeeld op een mobiel of tablet):<br>\n'
-          '<input type="radio" name="utility" value="1a">&nbsp;&nbsp;&nbsp;1 (totaal niet nuttig want <b>alles</b> is even belangrijk)<br>\n'
-          '<input type="radio" name="utility" value="1n">&nbsp;&nbsp;&nbsp;1 (totaal niet nuttig want <b>niets</b> is belangrijk)<br>\n'
-          '<input type="radio" name="utility" value="1o">&nbsp;&nbsp;&nbsp;1 (totaal niet nuttig om een andere reden)<br>\n'
-          '<input type="radio" name="utility" value="2">&nbsp;&nbsp;&nbsp;2<br>'
-          '<input type="radio" name="utility" value="3">&nbsp;&nbsp;&nbsp;3<br>'
-          '<input type="radio" name="utility" value="4">&nbsp;&nbsp;&nbsp;4<br>'
-          '<input type="radio" name="utility" value="5">&nbsp;&nbsp;&nbsp;5 (heel nuttig)<br>')
-out.write('<br>Opmerkingen (verplicht als je geen enkele post hebt geselecteerd):'
-          '<br><input type="text" size="80" name="comments"><br><br>\n')
-out.write('<input type="hidden" name="threadid" value="'+threadid+'">\n')
-out.write('<input type="hidden" name="forumtype" value="'+forumtype+'">\n')
-out.write('<input type="hidden" id="selected" name="selected" size="40">\n')
+    out.write('Geef op een schaal van 1 tot 5 aan hoe vertrouwd je bent met het onderwerp'
+              ' dat wordt besproken in dit topic:<br>\n'
+              '<input type="radio" name="familiarity" value="1">&nbsp;&nbsp;&nbsp;1 (totaal niet vertrouwd)<br>\n'
+              '<input type="radio" name="familiarity" value="2">&nbsp;&nbsp;&nbsp;2<br>'
+              '<input type="radio" name="familiarity" value="3">&nbsp;&nbsp;&nbsp;3<br>'
+              '<input type="radio" name="familiarity" value="4">&nbsp;&nbsp;&nbsp;4<br>'
+              '<input type="radio" name="familiarity" value="5">&nbsp;&nbsp;&nbsp;5 (heel vertrouwd)<br>')
+    out.write('<br>Geef op een schaal van 1 tot 5 aan hoe nuttig je het zou vinden om voor dit topic de mogelijkheid te hebben '
+              'om alleen de belangrijkste posts te zien (bijvoorbeeld op een mobiel of tablet):<br>\n'
+              '<input type="radio" name="utility" value="1a">&nbsp;&nbsp;&nbsp;1 (totaal niet nuttig want <b>alles</b> is even belangrijk)<br>\n'
+              '<input type="radio" name="utility" value="1n">&nbsp;&nbsp;&nbsp;1 (totaal niet nuttig want <b>niets</b> is belangrijk)<br>\n'
+              '<input type="radio" name="utility" value="1o">&nbsp;&nbsp;&nbsp;1 (totaal niet nuttig om een andere reden)<br>\n'
+              '<input type="radio" name="utility" value="2">&nbsp;&nbsp;&nbsp;2<br>'
+              '<input type="radio" name="utility" value="3">&nbsp;&nbsp;&nbsp;3<br>'
+              '<input type="radio" name="utility" value="4">&nbsp;&nbsp;&nbsp;4<br>'
+              '<input type="radio" name="utility" value="5">&nbsp;&nbsp;&nbsp;5 (heel nuttig)<br>')
+    out.write('<br>Opmerkingen (verplicht als je geen enkele post hebt geselecteerd):'
+              '<br><input type="text" size="80" name="comments"><br><br>\n')
+    out.write('<input type="hidden" name="threadid" value="'+threadid+'">\n')
+    out.write('<input type="hidden" name="forumtype" value="'+forumtype+'">\n')
+    out.write('<input type="hidden" id="selected" name="selected" size="40">\n')
 
-submittext = "Submit selection of posts and go to next thread"
-if forumtype == "viva":
-    submittext = "Verzend selectie en ga naar het volgende topic"
-out.write('<input type="submit" value="'+submittext+'">\n')
-out.write('</form>\n')
+    submittext = "Submit selection of posts and go to next thread"
+    if forumtype == "viva":
+        submittext = "Verzend selectie en ga naar het volgende topic"
+    out.write('<input type="submit" value="'+submittext+'">\n')
+    out.write('</form>\n')
 
-with open("footer.html",'r') as header:
-    for line in header:
-        out.write(line)
+    with open("footer.html",'r') as header:
+        for line in header:
+            out.write(line)
 
-sys.stderr.write("Output written to "+out.name+"\n")
+    sys.stderr.write("Output written to "+out.name+"\n")
 
-out.close()
+    out.close()
